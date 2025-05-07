@@ -5,15 +5,15 @@
 
 ## Технології
 - **Backend**: FastAPI (Python)
-- **Frontend**: Vite + React
-- **Розгортання**: Docker (опціонально)
+- **Frontend**: Vite + React (TypeScript)
+- **Розгортання**: Python скрипт `run.py`
 
 ## Встановлення та запуск
 
 ### Вимоги
-- Python 3.8+
-- Node.js 16+
-- npm
+- Python 3.10+
+- Node.js 18+
+- npm 9+
 
 ### Локальний запуск
 
