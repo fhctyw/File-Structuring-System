@@ -86,7 +86,7 @@ def preview(session_id: UUID, db: Session = Depends(get_db)):
 
 # ---------- 5. Застосування ----------
 @router.post("/sessions/{session_id}/apply", response_model=sch.ApplyResult)
-def apply_plan(
+async def apply_plan(
     session_id: UUID,
     payload: sch.ApplyRequest = Body(...),
     db: Session = Depends(get_db)
@@ -99,7 +99,7 @@ def apply_plan(
 
 # ---------- 6. Прогрес ----------
 @router.get("/sessions/{session_id}/progress", response_model=sch.ProgressReport)
-def get_progress(session_id: UUID, db: Session = Depends(get_db)):
+async def get_progress(session_id: UUID, db: Session = Depends(get_db)):
     progress = SessionService.get_progress(db, session_id)
     if progress is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Session not found")

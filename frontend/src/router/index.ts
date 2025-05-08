@@ -1,43 +1,47 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import FileExplorer from '@/components/FileExplorer.vue'
-import MethodSelection from '@/components/MethodSelection.vue'
-import AlgorithmSelection from '@/components/AlgorithmSelection.vue'
-import PreviewView from '@/components/PreviewView.vue'
-import ProgressView from '@/components/ProgressView.vue'
+
+const routes = [
+  {
+    path: '/',
+    component: () => import('../layouts/MainLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'home',
+        component: () => import('../views/FileManagerView.vue'),
+        meta: { title: 'File Manager', step: 1 }
+      },
+      {
+        path: '/method',
+        name: 'method',
+        component: () => import('../views/MethodSelectView.vue'),
+        meta: { title: 'Select Analysis Method', step: 2 }
+      },
+      {
+        path: '/algorithm',
+        name: 'algorithm',
+        component: () => import('../views/AlgorithmSelectView.vue'),
+        meta: { title: 'Select Structuring Algorithm', step: 3 }
+      },
+      {
+        path: '/preview',
+        name: 'preview',
+        component: () => import('../views/PreviewView.vue'),
+        meta: { title: 'Preview Changes', step: 4 }
+      },
+      {
+        path: '/result',
+        name: 'result',
+        component: () => import('../views/ResultView.vue'),
+        meta: { title: 'Processing Result', step: 5 }
+      }
+    ]
+  }
+]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: FileExplorer
-    },
-    {
-      path: '/method/:sessionId',
-      name: 'method',
-      component: MethodSelection,
-      props: true
-    },
-    {
-      path: '/algorithm/:sessionId',
-      name: 'algorithm',
-      component: AlgorithmSelection,
-      props: true
-    },
-    {
-      path: '/preview/:sessionId',
-      name: 'preview',
-      component: PreviewView,
-      props: true
-    },
-    {
-      path: '/progress/:sessionId',
-      name: 'progress',
-      component: ProgressView,
-      props: true
-    }
-  ]
+  history: createWebHistory(),
+  routes
 })
 
 export default router

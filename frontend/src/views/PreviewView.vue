@@ -1,139 +1,116 @@
-<template>
-  <div>
-    <p class="text-gray-600 dark:text-gray-300 mb-6">
-      Preview how your files will be organized. Review the new structure before applying changes.
-    </p>
-    
-    <div v-if="loading" class="flex justify-center items-center py-12">
-      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-500"></div>
-    </div>
-    
-    <div v-else-if="error" class="mt-4 p-3 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 rounded-md">
-      {{ error }}
-    </div>
-    
-    <div v-else-if="previewData?.tree" class="preview-container">
-      <div class="bg-gray-50 dark:bg-gray-800 rounded-md p-4 overflow-auto max-h-96">
-        <h3 class="text-lg font-semibold mb-2">New Structure</h3>
-        <TreeView :tree="previewData.tree" />
-      </div>
-      
-      <div v-if="planSummary" class="mt-6 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-md">
-        <h3 class="text-lg font-semibold mb-2">Summary</h3>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div class="bg-white dark:bg-gray-800 p-3 rounded-md shadow-sm">
-            <div class="text-sm text-gray-500 dark:text-gray-400">Total Actions</div>
-            <div class="text-2xl font-bold text-primary-600 dark:text-primary-400">
-              {{ planSummary.actions_created }}
-            </div>
-          </div>
-          
-          <div 
-            v-for="(count, action) in planSummary.breakdown" 
-            :key="action"
-            class="bg-white dark:bg-gray-800 p-3 rounded-md shadow-sm"
-          >
-            <div class="text-sm text-gray-500 dark:text-gray-400">{{ formatAction(action) }}</div>
-            <div class="text-2xl font-bold text-primary-600 dark:text-primary-400">
-              {{ count }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div v-else class="text-center py-10 text-gray-500">
-      No preview available. Please generate a plan first.
-    </div>
-    
-    <div class="mt-8 flex justify-between">
-      <button @click="goBack" class="btn btn-secondary">
-        Back
-      </button>
-      <button 
-        @click="applyChanges" 
-        class="btn btn-accent"
-        :disabled="!previewData || loading"
-      >
-        Apply Changes
-      </button>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useSessionStore } from '../stores/session'
-import TreeView from '../components/TreeView.vue'
-import type { PreviewTree, PlanSummary } from '../types'
+import PreviewTree from '../components/PreviewTree.vue'
+import { useSessionStore } from '../stores/useSessionStore'
+import { useFsStore } from '../stores/useFsStore'
 
 const router = useRouter()
 const sessionStore = useSessionStore()
+const fsStore = useFsStore()
 
-const previewData = ref<PreviewTree | null>(null)
-const planSummary = ref<PlanSummary | null>(null)
-const loading = ref(false)
-const error = ref<string | null>(null)
-
-async function loadPreview() {
-  loading.value = true
-  error.value = null
-  
-  try {
-    previewData.value = await sessionStore.getPreview()
-  } catch (err: any) {
-    error.value = err.response?.data?.detail || 'Failed to load preview'
-  } finally {
-    loading.value = false
-  }
-}
-
-function formatAction(action: string): string {
-  const formatted = action
-    .replace(/([A-Z])/g, ' $1')
-    .toLowerCase()
-    .trim();
-  
-  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-}
-
-function goBack() {
-  router.push('/algorithm')
-}
-
-async function applyChanges() {
-  loading.value = true
-  
-  try {
-    await sessionStore.applyPlan(false)
-    router.push('/progress')
-  } catch (err: any) {
-    error.value = err.response?.data?.detail || 'Failed to start applying changes'
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  // Redirect if no session exists or if no algorithm has been selected
-  if (!sessionStore.currentSession || 
-      !sessionStore.currentSession.analysisMethod || 
-      !sessionStore.currentSession.structAlgorithm) {
+// Redirect if no session exists
+onMounted(async () => {
+  if (!sessionStore.hasSession) {
     router.push('/')
     return
   }
   
-  loadPreview()
-  
-  // Using fake plan summary for now, this would ideally come from the API
-  planSummary.value = {
-    actions_created: 25,
-    breakdown: {
-      "MOVE": 15,
-      "RENAME": 7,
-      "CREATE_FOLDER": 3
-    }
-  }
+  await fetchPreview()
 })
+
+// Fetch preview of file structure changes
+const fetchPreview = async () => {
+  try {
+    await fsStore.fetchPreview(sessionStore.sessionId!)
+  } catch (err) {
+    console.error('Failed to fetch preview:', err)
+  }
+}
+
+// Go back to algorithm selection
+const goBack = () => {
+  router.push('/algorithm')
+}
+
+// Apply changes and proceed to result view
+const applyChanges = async () => {
+  try {
+    await sessionStore.applyChanges(false)
+    router.push('/result')
+  } catch (err) {
+    console.error('Failed to apply changes:', err)
+  }
+}
 </script>
+
+<template>
+  <div class="preview-view">
+    <h2 class="view-subtitle">Preview the structural changes</h2>
+    
+    <div v-if="fsStore.loading" class="loading">
+      Loading preview...
+    </div>
+    
+    <div v-else-if="fsStore.error" class="error">
+      {{ fsStore.error }}
+    </div>
+    
+    <div v-else class="preview-container">
+      <PreviewTree
+        :before="fsStore.previewBefore"
+        :after="fsStore.previewAfter"
+      />
+      
+      <div class="actions">
+        <button class="secondary" @click="goBack">Edit Selection</button>
+        <button @click="applyChanges">Start Structuring</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.preview-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.view-subtitle {
+  margin-bottom: var(--space-6);
+  color: var(--color-text-light);
+  font-weight: 500;
+}
+
+.loading, .error {
+  padding: var(--space-8);
+  text-align: center;
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+.preview-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  padding: var(--space-6);
+}
+
+.actions {
+  margin-top: var(--space-6);
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #e2e8f0;
+  padding-top: var(--space-6);
+}
+</style>

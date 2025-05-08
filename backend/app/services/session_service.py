@@ -250,6 +250,14 @@ class SessionService:
         # Нормалізуємо шлях
         dir_path = os.path.normpath(dir_path)
 
+        # Перевірка на "." або ".."
+        if dir_path in {".", ".."}:
+            return {
+                "error": "Шлях не може бути '.' або '..'.",
+                "has_access": False,
+                "entries": []
+            }
+
         if not dir_path.strip() or dir_path.strip() == "\\":
             return {
                 "error": "Шлях не може бути порожнім або некоректним.",
