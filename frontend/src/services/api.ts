@@ -53,11 +53,21 @@ export default {
     return api.get<Array<{id: string, name: string, description: string}>>('/struct-algorithms');
   },
 
-  // Get file system entries for a directory
+  // У файлі api.ts додайте трансформацію відповіді
   getFileSystemEntries(directory: string) {
-    // Make sure to encode the directory path properly for URL
-    return api.get<{directory: string, entries: FileSystemEntry[]}>('/fs/entries', {
-      params: { dir: directory }
+    return api.get<any>('/fs/entries', {
+      params: { dir: directory },
+      transformResponse: [(data) => {
+        // Перетворити рядок JSON в об'єкт
+        const parsedData = JSON.parse(data);
+        
+        // Якщо entries є об'єктом, але не масивом, конвертувати в масив
+        if (parsedData && parsedData.entries && typeof parsedData.entries === 'object' && !Array.isArray(parsedData.entries)) {
+          parsedData.entries = Object.values(parsedData.entries);
+        }
+        
+        return parsedData;
+      }]
     });
   },
 

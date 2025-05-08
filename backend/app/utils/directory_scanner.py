@@ -1,28 +1,47 @@
-import os, hashlib, mimetypes
+import os
 from typing import List, Dict
+from .file_analyzer import create_file_descriptor
 
-def _hash_file(path: str) -> str:
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(8192), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
-def scan(directory: str, recursive: bool = True) -> List[Dict]:
-    out: List[Dict] = []
-    walker = os.walk(directory) if recursive else [(directory, [], os.listdir(directory))]
-    for root, _, files in walker:
-        for fn in files:
-            fp = os.path.join(root, fn)
-            try:
-                out.append({
-                    "file_hash": _hash_file(fp),
-                    "filename": fn,
-                    "original_path": fp,
-                    "file_type": os.path.splitext(fn)[1].lstrip(".").lower(),
-                    "mime_type": mimetypes.guess_type(fp)[0] or "application/octet-stream",
-                    "size_bytes": os.path.getsize(fp)
-                })
-            except Exception:
-                continue
-    return out
+def scan_dir(directory: str, recursive: bool = False) -> list:
+    """
+    Сканувати директорію та повернути список файлових дескрипторів.
+    
+    Args:
+        directory (str): Шлях до директорії для сканування
+        recursive (bool): Чи сканувати підкаталоги рекурсивно
+        
+    Returns:
+        list: Список файлових дескрипторів
+    """
+    # Перевірка наявності директорії
+    if not os.path.exists(directory):
+        raise FileNotFoundError(f"Директорію не знайдено: {directory}")
+    
+    if not os.path.isdir(directory):
+        raise NotADirectoryError(f"Не є директорією: {directory}")
+    
+    file_descriptors = []
+    
+    # Визначення файлів для сканування в залежності від параметра recursive
+    if recursive:
+        # Обхід директорії та всіх піддиректорій
+        for root, _, files in os.walk(directory):
+            for file_name in files:
+                file_path = os.path.join(root, file_name)
+                try:
+                    file_descriptor = create_file_descriptor(file_path)
+                    file_descriptors.append(file_descriptor)
+                except Exception as e:
+                    print(f"Помилка обробки файлу {file_path}: {e}")
+    else:
+        # Сканування тільки файлів верхнього рівня
+        for item in os.listdir(directory):
+            item_path = os.path.join(directory, item)
+            if os.path.isfile(item_path):
+                try:
+                    file_descriptor = create_file_descriptor(item_path)
+                    file_descriptors.append(file_descriptor)
+                except Exception as e:
+                    print(f"Помилка обробки файлу {item_path}: {e}")
+    
+    return file_descriptors

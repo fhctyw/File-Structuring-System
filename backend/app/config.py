@@ -1,6 +1,4 @@
-import os
 from pathlib import Path
-from typing import Dict, List
 
 # Базова директорія додатку
 BASE_DIR = Path(__file__).parent

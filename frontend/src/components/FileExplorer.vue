@@ -1,257 +1,253 @@
 <template>
   <div class="file-explorer">
-    <div class="card">
+    <header class="explorer-header">
       <h2>Оберіть директорію для структурування</h2>
-      <div class="form-group">
-        <label for="directory">Шлях до директорії:</label>
-        <div class="directory-input">
-          <input
-            id="directory"
-            v-model="directory"
-            type="text"
-            class="form-control"
-            placeholder="/абсолютний/шлях/до/директорії"
-          />
-          <button @click="browseDirectory" class="btn-secondary">Обрати</button>
+      <div class="path-controls">
+        <input
+          v-model="currentPath"
+          type="text"
+          class="path-input"
+          placeholder="C:\шлях\до\директорії"
+          @keyup.enter="loadPath"
+        />
+        <button @click="loadPath" class="btn-secondary">Обрати</button>
+      </div>
+      <small class="path-tip">Використовуйте формат: C:\\Users\\username\\path</small>
+    </header>
+
+    <div v-if="loading" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Завантаження...</p>
+    </div>
+
+    <main class="explorer-body">
+      <div v-if="error" class="alert alert-danger">{{ error }}</div>
+
+      <div v-if="!error && currentEntries.length > 0" class="file-list">
+        <div 
+          v-if="hasParentDirectory" 
+          class="file-item is-folder" 
+          @click="navigateToParent"
+        >
+          <span class="icon back-icon"></span>
+          <span>..</span>
         </div>
-        <small class="path-tip">Використовуйте формат: C:\\Users\\username\\path (подвійний слеш)</small>
+
+        <div 
+          v-for="(entry, index) in currentEntries" 
+          :key="index" 
+          class="file-item" 
+          :class="{ 'is-folder': isFolder(entry) }" 
+          @click="handleItemClick(entry)"
+        >
+          <span :class="['icon', isFolder(entry) ? 'folder-icon' : 'file-icon']"></span>
+          <span>{{ entry.name || 'Без імені' }}</span>
+        </div>
       </div>
-      
-      <div class="form-group">
-        <label>
-          <input type="checkbox" v-model="recursive" />
-          Включати піддиректорії
-        </label>
+
+      <div v-if="!loading && !error && currentEntries.length === 0" class="empty-state">
+        <p>Порожня директорія або шлях не існує</p>
       </div>
-      
+    </main>
+
+    <footer class="explorer-footer">
+      <label>
+        <input type="checkbox" v-model="recursive" />
+        Включати піддиректорії
+      </label>
       <button 
         @click="createSession" 
         class="btn-primary" 
-        :disabled="!directory || loading"
+        :disabled="!currentPath || loading"
       >
-        Далі
+        Продовжити
       </button>
-      
-      <div v-if="error" class="alert alert-danger mt-3">
-        {{ formattedError }}
-      </div>
-
-      <div v-if="backendStatus === 'error'" class="alert alert-warning mt-3">
-        Схоже, що бекенд не запущено або не відповідає. Переконайтеся, що Python-сервер запущено.
-      </div>
-    </div>
-    
-    <div v-if="entries.length > 0" class="card">
-      <h3>Вміст директорії</h3>
-      <div class="file-list">
-        <div v-for="entry in entries" :key="entry.path || entry.name" class="file-item">
-          <span :class="['icon', entry.type === 'directory' ? 'folder' : 'file']"></span>
-          <span class="file-name">{{ entry.name }}</span>
-          <span class="size" v-if="entry.size">{{ formatSize(entry.size) }}</span>
-        </div>
-      </div>
-    </div>
+    </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/services/api';
-import type { FileSystemEntry } from '@/types';
 
 const router = useRouter();
-const directory = ref('');
-const recursive = ref(true);
-const entries = ref<FileSystemEntry[]>([]);
+const currentPath = ref('');
+const currentEntries = ref([]);
 const loading = ref(false);
 const error = ref('');
-const backendStatus = ref('unknown'); // 'unknown', 'ok', 'error'
+const recursive = ref(true);
 
-// Format path for windows (replace single backslashes with double)
-const formatPath = (path: string): string => {
-  // Replace single backslashes with double backslashes for the API
-  return path.replace(/\\/g, '\\\\');
-};
-
-// Format error message to be more user-friendly
-const formattedError = computed(() => {
-  if (error.value.includes('Not Found')) {
-    return `Директорія "${directory.value}" не знайдена або не може бути прочитана. Перевірте шлях та права доступу.`;
-  }
-  if (error.value.includes('Network Error')) {
-    backendStatus.value = 'error';
-    return "Помилка з'єднання з сервером. Переконайтеся, що Python-сервер запущено.";
-  }
-  return error.value;
+const hasParentDirectory = computed(() => {
+  const parts = currentPath.value.split(/[/\\]/);
+  return parts.length > 1;
 });
 
-const browseDirectory = async () => {
-  // In a real application, this would open a native file dialog
-  // For this demo, we'll just set a sample directory
-  directory.value = 'C:\\Users\\arsen\\Desktop';
-  await loadDirectoryContents();
+const navigateToParent = () => {
+  const parts = currentPath.value.split(/[/\\]/);
+  parts.pop();
+  currentPath.value = parts.join('\\');
+  loadPath();
 };
 
-const loadDirectoryContents = async () => {
-  if (!directory.value) return;
-  
+const loadPath = async () => {
+  if (!currentPath.value) return;
   loading.value = true;
   error.value = '';
-  
+
   try {
-    const formattedDir = formatPath(directory.value);
-    console.log(`Requesting directory: ${formattedDir}`);
-    
-    const response = await api.getFileSystemEntries(formattedDir);
-    entries.value = response.data.entries;
-    backendStatus.value = 'ok';
-  } catch (err: any) {
-    console.error('Error loading directory:', err);
-    if (err.response) {
-      error.value = `${err.response.status}: ${JSON.stringify(err.response.data)}`;
-    } else if (err.request) {
-      error.value = 'Network Error: Не вдалося з\'єднатися з сервером';
-      backendStatus.value = 'error';
-    } else {
-      error.value = err.message || 'Невідома помилка';
-    }
-    entries.value = [];
+    console.log('Запит до API з шляхом:', currentPath.value);
+    const response = await api.getFileSystemEntries(currentPath.value);
+    console.log('Відповідь API:', response.data);
+    currentEntries.value = response.data.entries || [];
+  } catch (err) {
+    console.error('Помилка завантаження:', err);
+    error.value = err.response?.data?.error || 'Помилка завантаження директорії';
   } finally {
     loading.value = false;
+    console.log('Завантаження завершено');
+  }
+};
+
+const isFolder = (entry) => entry.type === 'directory';
+
+const handleItemClick = (entry) => {
+  if (isFolder(entry)) {
+    currentPath.value = entry.path;
+    loadPath();
   }
 };
 
 const createSession = async () => {
-  if (!directory.value) return;
-  
+  if (!currentPath.value) return;
   loading.value = true;
   error.value = '';
-  
+
   try {
-    const formattedDir = formatPath(directory.value);
-    console.log(`Creating session for directory: ${formattedDir}`);
-    
-    const response = await api.createSession(formattedDir, recursive.value);
-    const sessionId = response.data.id;
-    router.push({ name: 'method', params: { sessionId } });
-  } catch (err: any) {
-    console.error('Error creating session:', err);
-    if (err.response) {
-      error.value = `${err.response.status}: ${JSON.stringify(err.response.data)}`;
-    } else if (err.request) {
-      error.value = 'Network Error: Не вдалося з\'єднатися з сервером';
-      backendStatus.value = 'error';
-    } else {
-      error.value = err.message || 'Невідома помилка';
-    }
+    const response = await api.createSession(currentPath.value, recursive.value);
+    router.push({ name: 'method', params: { sessionId: response.data.id } });
+  } catch (err) {
+    error.value = err.response?.data?.error || 'Помилка створення сесії';
   } finally {
     loading.value = false;
   }
 };
-
-const formatSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes';
-  
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
-
-onMounted(() => {
-  // Check if backend is available
-  api.getAnalysisMethods()
-    .then(() => {
-      backendStatus.value = 'ok';
-    })
-    .catch(() => {
-      backendStatus.value = 'error';
-    });
-    
-  // Load last used directory from localStorage if available
-  const lastDirectory = localStorage.getItem('lastDirectory');
-  if (lastDirectory) {
-    directory.value = lastDirectory;
-    loadDirectoryContents();
-  }
-});
 </script>
 
 <style scoped>
-.directory-input {
+.file-explorer {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  height: 100%;
 }
 
-.directory-input input {
+.explorer-header {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.path-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.path-input {
   flex-grow: 1;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
 }
 
 .path-tip {
-  display: block;
-  margin-top: 5px;
-  color: #6c757d;
+  margin-top: 0.5rem;
   font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 10;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.explorer-body {
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
 }
 
 .file-list {
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .file-item {
   display: flex;
   align-items: center;
   padding: 0.5rem;
-  border-bottom: 1px solid #f1f3f5;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
-.file-item:last-child {
-  border-bottom: none;
+.file-item:hover {
+  background-color: #f8f9fa;
+}
+
+.file-item.is-folder:hover {
+  background-color: #e7f1ff;
 }
 
 .icon {
   width: 20px;
   height: 20px;
   margin-right: 0.5rem;
-  background-size: contain;
-  background-repeat: no-repeat;
 }
 
-.icon.folder {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%234c6ef5' d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E");
+.folder-icon {
+  background: url('folder-icon.svg') no-repeat center;
 }
 
-.icon.file {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23868e96' d='M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z'/%3E%3C/svg%3E");
+.file-icon {
+  background: url('file-icon.svg') no-repeat center;
 }
 
-.size {
-  margin-left: auto;
-  color: #868e96;
-  font-size: 0.85rem;
+.back-icon {
+  background: url('back-icon.svg') no-repeat center;
 }
 
-.mt-3 {
-  margin-top: 1rem;
+.empty-state {
+  text-align: center;
+  color: #6c757d;
 }
 
-.alert-warning {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeeba;
-}
-
-.file-name {
-  flex-grow: 1;
-  margin-right: 10px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.explorer-footer {
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

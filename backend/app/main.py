@@ -2,11 +2,10 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import API_TITLE, API_DESCRIPTION, API_VERSION, API_PREFIX, DEBUG, FRONTEND_URL
+from .config import API_TITLE, API_DESCRIPTION, API_VERSION, API_PREFIX
 from .api.routes import router as api_router
 from .database import Base, engine
 
-from .models import struct_session, file_descriptor, file_analysis, file_instruction
 
 # Створення таблиць бази даних
 Base.metadata.create_all(bind=engine)

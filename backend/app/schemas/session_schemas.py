@@ -1,22 +1,19 @@
 from pydantic import BaseModel, Field
 from uuid import UUID
 from typing import Any, List, Dict, Literal, Optional
-from datetime import datetime
 
 # довідники
 AnalysisMethod  = Literal["META", "STRUCT", "SEMANTIC"]
-StructAlgorithm = Literal["BY_TYPE", "CLUSTER", "CRITERIA"]
+StructAlgorithm = Literal["CLUSTER", "CRITERIA"]
 
 # ---------- Запити ----------
 class SessionCreate(BaseModel):
     directory: str = Field(..., example="/abs/path")
     recursive: bool = Field(True, description="Scan sub‑directories too")
 
-class AnalysisRequest(BaseModel):
-    method: AnalysisMethod = Field(..., example="STRUCT")
-
-class PlanRequest(BaseModel):
-    algorithm: StructAlgorithm = Field(..., example="BY_TYPE")
+class ProcessRequest(BaseModel):
+    method: str      # "META" / "STRUCT" / "CONTENT"  (id з MethodRegistry)
+    algorithm: str   # "CRITERIA" / "CLUSTER" …      (id з AlgorithmRegistry)
 
 class ApplyRequest(BaseModel):
     dry_run: bool = Field(False, description="Preview only without real changes")
@@ -26,7 +23,6 @@ class SessionShort(BaseModel):
     id: UUID
     directory: str
     status: str
-    created_at: datetime
 
 class SessionDetail(SessionShort):
     recursive: bool
@@ -35,11 +31,8 @@ class SessionDetail(SessionShort):
     struct_algorithm: Optional[StructAlgorithm]
     actions_total: int
 
-class AnalysisSummary(BaseModel):
+class ProcessSummary(BaseModel):
     files_analyzed: int
-    description_examples: List[str]
-
-class PlanSummary(BaseModel):
     actions_created: int
     breakdown: Dict[str, int]
 
@@ -54,3 +47,13 @@ class ApplyResult(BaseModel):
 class ProgressReport(BaseModel):
     percent: int = Field(0, ge=0, le=100)
     status: str
+
+class MethodSchema(BaseModel):  # бажано описати окрему схему
+    id: str
+    description: str
+    returns: List[Dict[str, Any]]
+    layer: str | None = None
+    domain: str | None = None
+    action: str | None = None
+    impl_class: str | None = None
+    enabled: bool | None = True

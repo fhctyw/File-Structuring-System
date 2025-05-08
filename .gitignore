@@ -5,7 +5,7 @@ frontend/node_modules/
 backend/venv/
 
 # Ignore database files in backend
-backend/*.db
+*.db
 
 # Ignore build output
 dist/
@@ -20,3 +20,13 @@ Thumbs.db
 
 # Ignore config file
 config.json
+
+# Ignore Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Ignore virtual environments
+env/
+venv/

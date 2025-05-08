@@ -1,8 +1,7 @@
 from uuid import uuid4
-from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Column, String, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, String, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -27,13 +26,11 @@ class FileInstruction(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     session_id = Column(UUID(as_uuid=True), ForeignKey("struct_sessions.id", ondelete="CASCADE"))
-    file_hash = Column(String, index=True)
+    file_path = Column(String, index=True)
 
-    action = Column(String, nullable=False)        # ActionType
+    action = Column(String, nullable=False)
     status = Column(String, default=InstructionStatus.PENDING)
     params = Column(JSON, default={})
-
-    applied_at = Column(DateTime, nullable=True)
 
     # back‑ref
     session = relationship("StructSession", back_populates="instructions")
