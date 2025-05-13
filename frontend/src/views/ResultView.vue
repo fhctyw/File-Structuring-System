@@ -62,7 +62,7 @@ const startNew = () => {
     <div v-if="!isComplete">
       <ProgressOverlay
         :percentage="sessionStore.progress?.percentage || 0"
-        :status="sessionStore.progress?.status || 'Processing...'"
+        :status="sessionStore.progress?.status || 'Обробка...'"
         :message="sessionStore.progress?.message"
       />
     </div>
@@ -70,13 +70,13 @@ const startNew = () => {
     <div v-else class="completion-container">
       <div class="completion-card">
         <div class="success-icon">✓</div>
-        <h2 class="completion-title">Structuring Complete!</h2>
+        <h2 class="completion-title">Структуризація завершена!</h2>
         <p class="completion-message">
-          Your files have been successfully restructured according to the selected method and algorithm.
+          Ваші файли були успішно реструктуровані відповідно до обраного методу та алгоритму.
         </p>
         
         <div class="actions">
-          <button @click="startNew">Start New Structuring</button>
+          <button @click="startNew">Почати нову структуризацію</button>
         </div>
       </div>
     </div>

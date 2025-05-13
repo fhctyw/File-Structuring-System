@@ -9,7 +9,7 @@ const props = defineProps<{
 <template>
   <div class="progress-overlay">
     <div class="progress-card">
-      <h3 class="progress-title">Processing Files</h3>
+      <h3 class="progress-title">Обробка файлів</h3>
       
       <div class="progress-bar-container">
         <div class="progress-bar" :style="{ width: `${percentage}%` }"></div>

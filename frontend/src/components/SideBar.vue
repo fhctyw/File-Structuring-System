@@ -6,11 +6,11 @@ const route = useRoute()
 const router = useRouter()
 
 const steps = [
-  { name: 'File Selection', path: '/', step: 1 },
-  { name: 'Analysis Method', path: '/method', step: 2 },
-  { name: 'Structuring Algorithm', path: '/algorithm', step: 3 },
-  { name: 'Preview Changes', path: '/preview', step: 4 },
-  { name: 'Results', path: '/result', step: 5 }
+  { name: 'Вибір файлів', path: '/', step: 1 },
+  { name: 'Метод аналізу', path: '/method', step: 2 },
+  { name: 'Алгоритм структуризації', path: '/algorithm', step: 3 },
+  { name: 'Попередній перегляд', path: '/preview', step: 4 },
+  { name: 'Результати', path: '/result', step: 5 }
 ]
 
 const currentStep = computed(() => {
@@ -31,7 +31,7 @@ const navigateToStep = (path: string, step: number) => {
 <template>
   <aside class="sidebar">
     <div class="sidebar-header">
-      <h1 class="app-title">File Structuring</h1>
+      <h1 class="app-title">Структуризація файлів</h1>
     </div>
     <nav class="steps-nav">
       <div 

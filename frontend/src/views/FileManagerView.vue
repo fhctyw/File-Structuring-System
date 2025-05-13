@@ -20,7 +20,7 @@ const handleDirectorySelect = async (directory: string) => {
 
 <template>
   <div class="file-manager-view">
-    <h2 class="view-subtitle">Select a directory to begin structuring files</h2>
+    <h2 class="view-subtitle">Оберіть папку для початку структуризації файлів</h2>
     
     <div class="manager-container">
       <FileManager @select="handleDirectorySelect" />

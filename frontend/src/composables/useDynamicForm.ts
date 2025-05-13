@@ -75,7 +75,7 @@ export function useDynamicForm(schema: JsonSchema) {
       // Check required fields
       if (schema.required?.includes(key) && 
           (formData[key] === undefined || formData[key] === '')) {
-        newErrors[key] = 'This field is required'
+        newErrors[key] = 'Це поле є обов\'язковим'
         isValid = false
         return
       }
@@ -90,16 +90,16 @@ export function useDynamicForm(schema: JsonSchema) {
         case 'number':
         case 'integer':
           if (typeof formData[key] !== 'number') {
-            newErrors[key] = 'Must be a number'
+            newErrors[key] = 'Має бути числом'
             isValid = false
           } else {
             // Range validation
             if (prop.minimum !== undefined && formData[key] < prop.minimum) {
-              newErrors[key] = `Minimum value is ${prop.minimum}`
+              newErrors[key] = `Мінімальне значення ${prop.minimum}`
               isValid = false
             }
             if (prop.maximum !== undefined && formData[key] > prop.maximum) {
-              newErrors[key] = `Maximum value is ${prop.maximum}`
+              newErrors[key] = `Максимальне значення ${prop.maximum}`
               isValid = false
             }
           }
@@ -107,10 +107,10 @@ export function useDynamicForm(schema: JsonSchema) {
           
         case 'string':
           if (typeof formData[key] !== 'string') {
-            newErrors[key] = 'Must be a string'
+            newErrors[key] = 'Має бути текстом'
             isValid = false
           } else if (prop.enum && !prop.enum.includes(formData[key])) {
-            newErrors[key] = 'Invalid option selected'
+            newErrors[key] = 'Вибрано недопустимий варіант'
             isValid = false
           }
           break

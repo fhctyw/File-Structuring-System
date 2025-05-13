@@ -52,12 +52,12 @@ const selectDirectory = () => {
     </div>
     
     <div class="directory-path">
-      <span>Current directory: </span>
+      <span>Поточна папка: </span>
       <span class="path">{{ fsStore.currentDirectory || '/' }}</span>
     </div>
     
     <div v-if="fsStore.loading" class="loading">
-      Loading entries...
+      Завантаження файлів...
     </div>
     
     <div v-else-if="fsStore.error" class="error">
@@ -82,7 +82,7 @@ const selectDirectory = () => {
         </div>
         <div class="entry-name">{{ entry.name }}</div>
         <div class="entry-info">
-          <span v-if="entry.size">{{ (entry.size / 1024).toFixed(1) }} KB</span>
+          <span v-if="entry.size">{{ (entry.size / 1024).toFixed(1) }} КБ</span>
           <span v-if="entry.modified">{{ new Date(entry.modified).toLocaleDateString() }}</span>
         </div>
       </div>
@@ -93,7 +93,7 @@ const selectDirectory = () => {
         :disabled="!selectedDirectory"
         @click="selectDirectory"
       >
-        Select Directory
+        Вибрати папку
       </button>
     </div>
   </div>

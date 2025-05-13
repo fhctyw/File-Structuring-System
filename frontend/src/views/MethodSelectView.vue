@@ -51,9 +51,9 @@ const methodParamsSchema = computed(() => {
 
 // Доступні шари методів
 const layers = [
-  { id: 'META', name: 'Meta Information' },
-  { id: 'STRUCT', name: 'Structure Analysis' },
-  { id: 'CONTENT', name: 'Content Analysis' }
+  { id: 'META', name: 'Мета-інформація' },
+  { id: 'STRUCT', name: 'Аналіз структури' },
+  { id: 'CONTENT', name: 'Аналіз вмісту' }
 ]
 
 // Функція для отримання методів з API
@@ -116,7 +116,7 @@ onMounted(async () => {
 
 <template>
   <div class="method-select-view">
-    <h2 class="view-subtitle">Select an analysis method for your files</h2>
+    <h2 class="view-subtitle">Оберіть метод аналізу для ваших файлів</h2>
     
     <!-- Debug info для розробки -->
     <!-- <div class="debug-info" style="margin-bottom: 10px; padding: 10px; border: 1px solid #ccc;">
@@ -131,17 +131,17 @@ onMounted(async () => {
     
     <!-- Екран завантаження -->
     <div v-if="isLoading" class="loading">
-      Loading available methods...
+      Завантаження доступних методів...
     </div>
     
     <!-- Повідомлення про помилку -->
     <div v-else-if="hasError" class="error">
-      Error: {{ errorMessage }}
+      Помилка: {{ errorMessage }}
     </div>
     
     <!-- Немає даних після завантаження -->
     <div v-else-if="!hasData" class="info">
-      No data available. Try refreshing the page.
+      Дані відсутні. Спробуйте оновити сторінку.
     </div>
     
     <!-- Основний вміст - методи та вибір -->
@@ -160,7 +160,7 @@ onMounted(async () => {
       
       <!-- Повідомлення, якщо немає методів у вибраному шарі -->
       <div v-if="methodsInSelectedLayer.length === 0" class="no-methods">
-        No methods available for the selected layer.
+        Методи для вибраного шару відсутні.
       </div>
       
       <!-- Сітка методів -->
@@ -172,17 +172,17 @@ onMounted(async () => {
           :class="{ 'selected': selectedMethod === method.id }"
           @click="handleMethodSelect(method.id)"
         >
-          <div v-if="selectedMethod === method.id" class="selected-indicator">✓ Selected</div>
+          <div v-if="selectedMethod === method.id" class="selected-indicator">✓ Вибрано</div>
 
           <div class="method-header">
             <h3 class="method-name">{{ method.action }}</h3>
-            <span class="method-domain">Domain: {{ method.domain }}</span>
+            <span class="method-domain">Область: {{ method.domain }}</span>
           </div>
           
           <p class="method-description">{{ method.description }}</p>
           
           <div class="method-returns">
-            <h4>Returns:</h4>
+            <h4>Повертає:</h4>
             <ul>
               <li v-for="ret in method.returns" :key="ret.name">
                 {{ ret.name }}: <span class="return-type">{{ ret.type }}</span>
@@ -195,12 +195,12 @@ onMounted(async () => {
       
       <!-- Кнопки дій -->
       <div class="actions">
-        <button class="secondary" @click="router.push('/')">Back</button>
+        <button class="secondary" @click="router.push('/')">Назад</button>
         <button
           :disabled="!selectedMethod"
           @click="continueToAlgorithm"
         >
-          Continue
+          Продовжити
         </button>
       </div>
     </div>
@@ -381,5 +381,17 @@ onMounted(async () => {
 
 .method-card {
   position: relative;
+}
+
+.selected-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--color-primary);
+  color: white;
+  padding: 2px 8px;
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 </style>

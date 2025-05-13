@@ -117,7 +117,7 @@ const formatDescription = (description?: string) => {
         :class="{ 'has-error': getFieldError(key) }"
         @blur="touchField(key)"
       >
-        <option value="" disabled>Please select</option>
+        <option value="" disabled>Будь ласка, оберіть</option>
         <option
           v-for="option in property.enum"
           :key="option"
@@ -144,12 +144,12 @@ const formatDescription = (description?: string) => {
       
       <!-- Object fields handled recursively (TODO: implement for complex nested objects) -->
       <div v-else-if="getFieldComponent(key, property) === 'object'" class="object-field">
-        <div class="field-description">Complex object field (to be implemented)</div>
+        <div class="field-description">Поле складного об'єкта (буде реалізовано)</div>
       </div>
       
       <!-- Array fields handled recursively (TODO: implement for arrays) -->
       <div v-else-if="getFieldComponent(key, property) === 'array'" class="array-field">
-        <div class="field-description">Array field (to be implemented)</div>
+        <div class="field-description">Поле масиву (буде реалізовано)</div>
       </div>
       
       <!-- Error message -->
@@ -161,7 +161,7 @@ const formatDescription = (description?: string) => {
     <!-- Form controls -->
     <div class="form-actions">
       <slot name="actions">
-        <button type="submit" class="submit-button">Submit</button>
+        <button type="submit" class="submit-button">Відправити</button>
       </slot>
     </div>
   </form>

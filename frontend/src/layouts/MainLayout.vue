@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
 
 const route = useRoute()
-const currentTitle = computed(() => route.meta.title || 'File Structuring System')
+const currentTitle = computed(() => route.meta.title || 'Система структуризації файлів')
 </script>
 
 <template>

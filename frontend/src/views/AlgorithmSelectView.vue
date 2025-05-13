@@ -110,7 +110,7 @@ onMounted(async () => {
 
 <template>
   <div class="algorithm-select-view">
-    <h2 class="view-subtitle">Select a structuring algorithm for your files</h2>
+    <h2 class="view-subtitle">Оберіть алгоритм для структуризації ваших файлів</h2>
     
     <!-- Debug info для розробки -->
     <!-- <div class="debug-info" style="margin-bottom: 10px; padding: 10px; border: 1px solid #ccc;">
@@ -125,24 +125,24 @@ onMounted(async () => {
     
     <!-- Екран завантаження -->
     <div v-if="isLoading" class="loading">
-      Loading available algorithms...
+      Завантаження доступних алгоритмів...
     </div>
     
     <!-- Повідомлення про помилку -->
     <div v-else-if="hasError" class="error">
-      Error: {{ errorMessage }}
+      Помилка: {{ errorMessage }}
     </div>
     
     <!-- Немає даних після завантаження -->
     <div v-else-if="!hasData" class="info">
-      No algorithms available. Try refreshing the page.
+      Алгоритми відсутні. Спробуйте оновити сторінку.
     </div>
     
     <!-- Основний вміст - алгоритми та вибір -->
     <div v-else class="algorithm-selection">
       <!-- Сітка алгоритмів -->
       <div v-if="algorithmsApi$.data.value.length === 0" class="no-algorithms">
-        No algorithms available.
+        Алгоритми відсутні.
       </div>
       
       <div v-else class="algorithms-grid">
@@ -153,11 +153,11 @@ onMounted(async () => {
           :class="{ 'selected': selectedAlgorithm === algorithm.id }"
           @click="handleAlgorithmSelect(algorithm.id)"
         >
-          <div v-if="selectedAlgorithm === algorithm.id" class="selected-indicator">✓ Selected</div>
+          <div v-if="selectedAlgorithm === algorithm.id" class="selected-indicator">✓ Вибрано</div>
           
           <div class="algorithm-header">
             <h3 class="algorithm-name">{{ algorithm.id }}</h3>
-            <span class="algorithm-scope">Scope: {{ algorithm.scope }}</span>
+            <span class="algorithm-scope">Область: {{ algorithm.scope }}</span>
           </div>
           
           <p class="algorithm-description">{{ algorithm.description }}</p>
@@ -166,9 +166,9 @@ onMounted(async () => {
       
       <!-- Параметри вибраного алгоритму -->
       <div v-if="selectedAlgorithm" class="algorithm-params">
-        <h3>Algorithm Parameters</h3>
+        <h3>Параметри алгоритму</h3>
         <p class="params-info">
-          Configure parameters for the selected algorithm:
+          Налаштуйте параметри для вибраного алгоритму:
           <strong>{{ selectedAlgorithmObject?.id }}</strong>
         </p>
         
@@ -181,12 +181,12 @@ onMounted(async () => {
       
       <!-- Кнопки дій -->
       <div class="actions">
-        <button class="secondary" @click="router.push('/method')">Back</button>
+        <button class="secondary" @click="router.push('/method')">Назад</button>
         <button
           :disabled="!selectedAlgorithm"
           @click="continueToPreview"
         >
-          Continue
+          Продовжити
         </button>
       </div>
     </div>

@@ -46,10 +46,10 @@ const applyChanges = async () => {
 
 <template>
   <div class="preview-view">
-    <h2 class="view-subtitle">Preview the structural changes</h2>
+    <h2 class="view-subtitle">Попередній перегляд структурних змін</h2>
     
     <div v-if="fsStore.loading" class="loading">
-      Loading preview...
+      Завантаження попереднього перегляду...
     </div>
     
     <div v-else-if="fsStore.error" class="error">
@@ -63,8 +63,8 @@ const applyChanges = async () => {
       />
       
       <div class="actions">
-        <button class="secondary" @click="goBack">Edit Selection</button>
-        <button @click="applyChanges">Start Structuring</button>
+        <button class="secondary" @click="goBack">Редагувати вибір</button>
+        <button @click="applyChanges">Почати структуризацію</button>
       </div>
     </div>
   </div>

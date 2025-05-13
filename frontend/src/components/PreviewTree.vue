@@ -14,7 +14,7 @@ const buildTree = (entries: FileEntry[] = []) => {
   if (!entries || !Array.isArray(entries)) {
     console.warn('Invalid entries provided to buildTree:', entries)
     return {
-      name: 'Root',
+      name: 'Корінь',
       path: '',
       type: 'directory',
       children: []
@@ -22,7 +22,7 @@ const buildTree = (entries: FileEntry[] = []) => {
   }
   
   const root: any = {
-    name: 'Root',
+    name: 'Корінь',
     path: '',
     type: 'directory',
     children: []
@@ -74,12 +74,12 @@ console.log('Raw after data:', props.after)
 <template>
   <div class="preview-tree">
     <div class="tree-container">
-      <h3 class="tree-title">Before</h3>
+      <h3 class="tree-title">До</h3>
       <div v-if="props.before && props.before.length > 0" class="tree-view">
         <TreeNode :node="beforeTree" :depth="0" />
       </div>
       <div v-else class="empty-tree">
-        No data available
+        Дані відсутні
       </div>
     </div>
     
@@ -90,12 +90,12 @@ console.log('Raw after data:', props.after)
     </div>
     
     <div class="tree-container">
-      <h3 class="tree-title">After</h3>
+      <h3 class="tree-title">Після</h3>
       <div v-if="props.after && props.after.length > 0" class="tree-view">
         <TreeNode :node="afterTree" :depth="0" />
       </div>
       <div v-else class="empty-tree">
-        No data available
+        Дані відсутні
       </div>
     </div>
   </div>
