@@ -245,12 +245,9 @@ class SessionService:
 
     @staticmethod
     def get_fs_entries(dir_path: str) -> Dict[str, Any]:
-        """Отримати список файлів та директорій з детальною інформацією."""
             
-        # Нормалізуємо шлях
         dir_path = os.path.normpath(dir_path)
 
-        # Перевірка на "." або ".."
         if dir_path in {".", ".."}:
             return {
                 "error": "Шлях не може бути '.' або '..'.",
@@ -265,7 +262,6 @@ class SessionService:
                 "entries": []
             }
         
-        # Визначаємо батьківську директорію
         parent_dir = os.path.dirname(dir_path)
         print(dir_path, parent_dir)
         
@@ -355,7 +351,6 @@ class SessionService:
         
         return result
 
-    # ---------- CRUD сесій ----------
     @staticmethod
     def create_session(db: DBSession, payload: SessionCreate) -> Dict[str, Any]:
         sess = StructSession(
@@ -384,7 +379,6 @@ class SessionService:
     @staticmethod
     def get_session(db: DBSession, sid):
         return db.query(StructSession).filter(StructSession.id == sid).first()
-
 
     @staticmethod
     def analyze_and_plan(db: DBSession, sid, method_id, algorithm_id):
@@ -479,7 +473,6 @@ class SessionService:
                 "breakdown": {"total": 0}
             }
 
-    # ---------- PREVIEW ----------
     @staticmethod
     def get_preview(db: DBSession, sid) -> Optional[Dict]:
         """
@@ -559,7 +552,6 @@ class SessionService:
             current_node[file_name] = f"MOVE->{dst_dir}"
         
         return {"tree": tree}
-
 
     # ---------- APPLY ----------
     @staticmethod

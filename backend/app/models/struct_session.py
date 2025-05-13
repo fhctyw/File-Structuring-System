@@ -28,13 +28,13 @@ class StructSession(Base):
         String,
         ForeignKey("methods.id", ondelete="SET NULL"),
         nullable=True
-    )                                    # META / STRUCT / CONTENT  → MethodRegistry.id
+    )
 
     struct_algorithm_id = Column(
         String,
         ForeignKey("struct_algorithms.id", ondelete="SET NULL"),
         nullable=True
-    )                                    # CRITERIA / CLUSTER ...   → AlgorithmRegistry.id
+    )
     
     status = Column(String, default=SessionStatus.NEW)
 

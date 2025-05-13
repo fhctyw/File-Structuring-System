@@ -46,8 +46,7 @@ def list_sessions(skip: int = 0, limit: int = 50, db: Session = Depends(get_db))
     return SessionService.list_sessions(db, skip, limit)
 
 @router.get(
-    "/sessions/{session_id}",
-    # response_model=sch.SessionDetail
+    "/sessions/{session_id}"
 )
 def get_session(
     session_id: UUID,
@@ -69,22 +68,24 @@ def analyze_and_plan(
         summary = SessionService.analyze_and_plan(db, session_id,
                                                 payload.method,
                                                 payload.algorithm)
+        if summary is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Session not found")
+        return summary
     except Exception as e:
-        print(e)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
-    if summary is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Session not found")
-    return summary
 
-# ---------- 4. Прев’ю ----------
+# ---------- Прев’ю ----------
 @router.get("/sessions/{session_id}/preview", response_model=sch.PreviewTree)
 def preview(session_id: UUID, db: Session = Depends(get_db)):
-    tree = SessionService.get_preview(db, session_id)
-    if tree is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Session not found")
-    return tree
+    try:
+        tree = SessionService.get_preview(db, session_id)
+        if tree is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Session not found")
+        return tree
+    except Exception as e:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
 
-# ---------- 5. Застосування ----------
+# ---------- Застосування ----------
 @router.post("/sessions/{session_id}/apply", response_model=sch.ApplyResult)
 async def apply_plan(
     session_id: UUID,

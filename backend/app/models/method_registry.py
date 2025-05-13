@@ -11,10 +11,6 @@ class MethodsLayer(str, Enum):
 
 
 class MethodRegistry(Base):
-    """
-    Системна таблиця: перелік усіх екстракторів.
-    Користувач напряму з нею не працює.
-    """
     __tablename__ = "methods"
 
     id = Column(String, primary_key=True)
@@ -23,7 +19,6 @@ class MethodRegistry(Base):
     action = Column(String, nullable=False)
     description = Column(String, nullable=True)
 
-    # [{ "key": "width_px", "type": "int", "unit": "px" }, ...]
     returns = Column(JSON, default=list)
 
     impl_class = Column(String, nullable=False)
