@@ -131,7 +131,7 @@ def stop_all():
 
 def main():
     parser = argparse.ArgumentParser(description="Запуск бекенду (FastAPI) та фронтенду (Vite) разом з конфігурацією")
-    parser.add_argument("-c", "--config", required=True, help="Шлях до конфігураційного файлу для структурування")
+    parser.add_argument("-c", "--config", help="Шлях до конфігураційного файлу для структурування", default=None)
     parser.add_argument("-p", "--production", action="store_true", help="Запуск в режимі продакшену")
 
     args = parser.parse_args()
@@ -143,8 +143,8 @@ def main():
     mode = "ПРОДАКШЕН" if args.production else "РОЗРОБКА"
     print(f"{COLORS['SYSTEM']}🚀 Запуск у режимі {mode}{COLORS['RESET']}")
 
-    # Перевірка конфігураційного файлу
-    if not os.path.isfile(args.config):
+    # Перевірка конфігураційного файлу (якщо він був вказаний)
+    if args.config and not os.path.isfile(args.config):
         print(f"{COLORS['ERROR']}❌ Конфігураційний файл не знайдено: {args.config}{COLORS['RESET']}")
         sys.exit(1)
 
@@ -154,9 +154,10 @@ def main():
     # Налаштування середовища фронтенду
     setup_frontend(frontend_dir, args.production)
 
-    # Передача шляху до конфігурації як змінної середовища
+    # Передача шляху до конфігурації як змінної середовища (якщо файл вказано)
     backend_env = os.environ.copy()
-    backend_env["STRUCTURE_CONFIG_PATH"] = os.path.abspath(args.config)
+    if args.config:
+        backend_env["STRUCTURE_CONFIG_PATH"] = os.path.abspath(args.config)
     
     # Додавання прапорця продакшену до середовища
     if args.production:
